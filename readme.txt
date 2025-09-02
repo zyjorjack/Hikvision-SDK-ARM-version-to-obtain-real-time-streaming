@@ -1,4 +1,4 @@
-1.将lib下所有的库拷贝到 hiklib 下，包括 HCNetSDKCom 文件夹
+1.在不同平台上使用如Linux 64 、Windows，将不同版本的lib下所有的库拷贝到 hiklib 下，包括 HCNetSDKCom 文件夹
 2.在终端输入 make 命令即可生成 main，使用 ./main 即可执行
 
 cameras_config.txt 文件用于存储多个海康威视摄像头的连接配置信息。两个程序都使用相同的格式读取这个文件。
@@ -30,3 +30,4 @@ main1.cpp 使用 strncpy 安全拷贝字符串到字符数组，避免内存越�
 
 main1.cpp 定义了 RealDataCallBack 回调函数用于接收实时流数据，但未实现图像显示。
 main.cpp 没有使用回调，而是主动轮询抓图。
+
