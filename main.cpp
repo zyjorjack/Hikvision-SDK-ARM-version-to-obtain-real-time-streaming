@@ -1,14 +1,14 @@
 #include <iostream>
-#include "HCNetSDK.h"  // °üº¬º£¿µÍşÊÓ SDK µÄÍ·ÎÄ¼ş
-#include <opencv2/opencv.hpp>  // °üº¬OpenCVµÄÍ·ÎÄ¼ş
-#include <fstream>  // ÎÄ¼şÁ÷
+#include "HCNetSDK.h"  // åŒ…å«æµ·åº·å¨è§† SDK çš„å¤´æ–‡ä»¶
+#include <opencv2/opencv.hpp>  // åŒ…å«OpenCVçš„å¤´æ–‡ä»¶
+#include <fstream>  // æ–‡ä»¶æµ
 #include <vector> 
-#include <thread>  // Ïß³Ì
+#include <thread>  // çº¿ç¨‹
 #include <sstream>
 
-// ÉãÏñÍ·ÅäÖÃ½á¹¹Ìå
+// æ‘„åƒå¤´é…ç½®ç»“æ„ä½“
 struct CameraConfig {
-	std::string index;  // ÅäÖÃÎÄ¼şĞòºÅ
+	std::string index;  // é…ç½®æ–‡ä»¶åºå·
 	std::string ip;
 	std::string username;
 	std::string password;
@@ -17,19 +17,19 @@ struct CameraConfig {
 	LONG realPlayHandle;
 };
 
-// Ïà»úÍ¼ÏñÏÔÊ¾º¯Êı
+// ç›¸æœºå›¾åƒæ˜¾ç¤ºå‡½æ•°
 void CaptureAndShowCameraStream(CameraConfig& cameraConfig) {
 	
 
-	// µÇÂ¼Éè±¸
+	// ç™»å½•è®¾å¤‡
 	NET_DVR_USER_LOGIN_INFO loginInfo = { 0 };
 	NET_DVR_DEVICEINFO_V40 deviceInfo = { 0 };
 
-	// ÉèÖÃÉè±¸ĞÅÏ¢
+	// è®¾ç½®è®¾å¤‡ä¿¡æ¯
 	strncpy(loginInfo.sDeviceAddress, cameraConfig.ip.c_str(), sizeof(loginInfo.sDeviceAddress) - 1);  // ip
-	loginInfo.wPort = 8000;  // ¶Ë¿ÚºÅÄ¬ÈÏ8000
-	strncpy(loginInfo.sUserName, cameraConfig.username.c_str(), sizeof(loginInfo.sDeviceAddress) - 1);    // ÓÃ»§Ãû
-	strncpy(loginInfo.sPassword, cameraConfig.password.c_str(), sizeof(loginInfo.sDeviceAddress) - 1);    // ÃÜÂë
+	loginInfo.wPort = 8000;  // ç«¯å£å·é»˜è®¤8000
+	strncpy(loginInfo.sUserName, cameraConfig.username.c_str(), sizeof(loginInfo.sDeviceAddress) - 1);    // ç”¨æˆ·å
+	strncpy(loginInfo.sPassword, cameraConfig.password.c_str(), sizeof(loginInfo.sDeviceAddress) - 1);    // å¯†ç 
 
 	cameraConfig.userID = NET_DVR_Login_V40(&loginInfo, &deviceInfo);
 	if (cameraConfig.userID < 0) {
@@ -37,14 +37,14 @@ void CaptureAndShowCameraStream(CameraConfig& cameraConfig) {
 		return;
 	}
 
-	// ÉèÖÃÔ¤ÀÀĞÅÏ¢
+	// è®¾ç½®é¢„è§ˆä¿¡æ¯
 	NET_DVR_PREVIEWINFO previewInfo = { 0 };
 	previewInfo.lChannel = cameraConfig.channel;
-	previewInfo.dwStreamType = 0;  // Ö÷ÂëÁ÷
+	previewInfo.dwStreamType = 0;  // ä¸»ç æµ
 	previewInfo.dwLinkMode = 0;
 	previewInfo.bBlocked = 0;
 
-	// Æô¶¯ÊµÊ±Ô¤ÀÀ
+	// å¯åŠ¨å®æ—¶é¢„è§ˆ
 	cameraConfig.realPlayHandle = NET_DVR_RealPlay_V40(cameraConfig.userID, &previewInfo, NULL, NULL);
 	if (cameraConfig.realPlayHandle < 0) {
 		std::cout << "ip:" << cameraConfig.ip << " Device preview failed with error code:" << NET_DVR_GetLastError() << std::endl;
@@ -52,15 +52,15 @@ void CaptureAndShowCameraStream(CameraConfig& cameraConfig) {
 		return;
 	}
 
-	// ´´½¨OpenCV´°¿Ú
+	// åˆ›å»ºOpenCVçª—å£
 	std::string windowname = "Camera Stream - " + cameraConfig.ip + "-" +cameraConfig.index;
 	cv::namedWindow(windowname, cv::WINDOW_NORMAL);
 	std::cout << "ip:" << cameraConfig.ip << " Device preview successful!" << std::endl;
 
-	// ½øĞĞ×¥Í¼
+	// è¿›è¡ŒæŠ“å›¾
 	NET_DVR_JPEGPARA* img_para = new NET_DVR_JPEGPARA;
 	img_para->wPicQuality = 1;
-	img_para->wPicSize = 9;  // ÉèÖÃ·Ö±æÂÊ
+	img_para->wPicSize = 9;  // è®¾ç½®åˆ†è¾¨ç‡
 
 	while (true) {
 		DWORD picSize = 1920 * 1080;
@@ -74,13 +74,13 @@ void CaptureAndShowCameraStream(CameraConfig& cameraConfig) {
 			break;
 		}
 
-		// ×ªÎªMat¸ñÊ½
+		// è½¬ä¸ºMatæ ¼å¼
 		cv::Mat grabImg = cv::imdecode(cv::Mat(1, picSize, CV_8UC1, jpegBuffer), cv::IMREAD_COLOR);
 
-		// ÏÔÊ¾Í¼Ïñ
-		// cv::imshow(windowname, grabImg);
+		// æ˜¾ç¤ºå›¾åƒ
+		cv::imshow(windowname, grabImg);
 
-		// °´ESCÍË³ö
+		// æŒ‰ESCé€€å‡º
 		if (cv::waitKey(1) == 27) {
 			break;
 		}
@@ -88,13 +88,13 @@ void CaptureAndShowCameraStream(CameraConfig& cameraConfig) {
 		delete[] jpegBuffer;
 	}
 
-	// ÇåÀí×ÊÔ´
+	// æ¸…ç†èµ„æº
 	NET_DVR_StopRealPlay(cameraConfig.realPlayHandle);
 	NET_DVR_Logout(cameraConfig.userID);
 	delete img_para;
 }
 
-// ¶ÁÈ¡Ïà»úÅäÖÃ
+// è¯»å–ç›¸æœºé…ç½®
 int ReadCameraConfig(std::vector<CameraConfig>& cameras, const std::string& configFile) {
 	std::ifstream file(configFile);
 	std::string line;
@@ -113,7 +113,7 @@ int ReadCameraConfig(std::vector<CameraConfig>& cameras, const std::string& conf
 
 
 int main() {
-	// ³õÊ¼»¯º£¿µÍşÊÓSDK
+	// åˆå§‹åŒ–æµ·åº·å¨è§†SDK
 	if (!NET_DVR_Init()) {
 		std::cout << "SDK initialization failed!" << std::endl;
 		return -1;
@@ -121,23 +121,24 @@ int main() {
 
 	std::vector<CameraConfig> cameras;
 
-	// ¶ÁÈ¡Ïà»úÅäÖÃÎÄ¼ş
+	// è¯»å–ç›¸æœºé…ç½®æ–‡ä»¶
 	int camera_num = ReadCameraConfig(cameras, "cameras_config.txt");
 	std::cout << "Get " << camera_num << " Camera equipment!" << std::endl;
 
-	// Æô¶¯Ã¿¸öÏà»úµÄÊÓÆµÁ÷
+	// å¯åŠ¨æ¯ä¸ªç›¸æœºçš„è§†é¢‘æµ
 	std::vector<std::thread> threads;
 	for (auto& camera : cameras) {
 		threads.push_back(std::thread(CaptureAndShowCameraStream, std::ref(camera)));
 	}
 
-	// µÈ´ıËùÓĞÏß³ÌÍê³É
+	// ç­‰å¾…æ‰€æœ‰çº¿ç¨‹å®Œæˆ
 	for (auto& t : threads) {
 		t.join();
 	}
 
-	// ÇåÀíSDK×ÊÔ´
+	// æ¸…ç†SDKèµ„æº
 	NET_DVR_Cleanup();
 
 	return 0;
+
 }
